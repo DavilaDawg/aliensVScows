@@ -24,6 +24,10 @@ totalTime = 0
 gameTime = [60, 40, 20]
 fastest_times= []
 timeSaved= False 
+currentRound=0
+game_over = False
+win_counted = False 
+collisionTracked = False
 
 font = pygame.font.Font("raidercrusaderlaser.ttf", 36)
 fontBig = pygame.font.Font("raidercrusaderlaser.ttf", 70)
@@ -48,10 +52,6 @@ cows = [
     for _ in range(numOfCows)
 ]
 
-currentRound=0
-game_over = False
-win_counted = False 
-
 running = True
 while running:
     dt = clock.tick(60) / 1000
@@ -75,14 +75,14 @@ while running:
     screen.blit(bg, (0, 0))
     screen.blit(playerImg, (player_pos.x, player_pos.y))
     screen.blit(farmImg, (300, 300))
-    farm_rect = pygame.Rect(300, 300, cowSize, cowSize)
+    farm1_rect = pygame.Rect(300, 300, cowSize, cowSize)
     screen.blit(farmImg, (900, 10))
-    farm_rect = pygame.Rect(900, 10, cowSize, cowSize)
+    farm2_rect = pygame.Rect(900, 10, cowSize, cowSize)
 
+    ufo_rect = pygame.Rect(player_pos.x, player_pos.y, playerSize, playerSize)
 
-    if farm_rect.collidepoint(player_pos.x, player_pos.y):
-        game_over=True
-        print("game_over")
+    if ufo_rect.colliderect(farm1_rect) or ufo_rect.colliderect(farm2_rect):
+        collisionTracked =True 
         
     # Player movement
     keys = pygame.key.get_pressed()
@@ -158,10 +158,10 @@ while running:
     screen.blit(text, (10,10))
 
     # game over page 
-    if (numCaptured == numOfCows or timeRemaining == 0):   
+    if (numCaptured == numOfCows or timeRemaining == 0 or collisionTracked):   
         game_over = True    
 
-        if not timeSaved: 
+        if not timeSaved and numCaptured == numOfCows: 
             completion_time =totalTime 
             completion_time= totalTime
             fastest_times.append(completion_time)
@@ -191,7 +191,7 @@ while running:
 
         for i, time in enumerate(fastest_times):
             leaderText= font.render("Leaderboard:", True, (40,35,100))
-            textFastest=fontSmall.render(f"#{i+1}: {time:.2f}s", True, (100,100,100))
+            textFastest=fontSmall.render(f"#{i+1}: {time:.2f}s", True, (100,100,100)) 
             screen.blit(leaderText,(screen_width/2 - 100, screen_height/2 - 50))
             screen.blit(textFastest, (screen_width/2 - 100, screen_height/2 + i * 30))
 
@@ -206,8 +206,10 @@ while running:
                     currentRound = (currentRound + 1) % len(gameTime)
                     game_over = False
                     win_counted = False
-                    timeRemaining= False 
                     timeSaved = False
+                    collisionTracked = False
+
+                    player_pos = pygame.Vector2(screen_width / 2, 10) 
 
                     cows = [
                         {
