@@ -1,7 +1,26 @@
 import pygame
 import random
 
+pygame.mixer.init()
 pygame.init()
+
+music_files = {
+    "background": "synthwave.mp3",
+    "gameover": "gameover.mp3",
+}
+
+wooshSound = pygame.mixer.Sound("woosh.mp3")
+zoomSound = pygame.mixer.Sound("zoom.mp3")
+
+def play_music(music_key, loop=True, volume=1):
+    if music_key in music_files:
+        pygame.mixer.music.load(music_files[music_key])
+        pygame.mixer.music.set_volume(volume)
+        pygame.mixer.music.play(-1 if loop else 0)
+    else:
+        print(f"Error: {music_key} not found in music_files.")
+
+play_music("background", loop=True, volume=2)
 
 screen = pygame.display.set_mode((1280, 720))
 pygame.display.set_caption("Aliens vs Cows")
@@ -16,7 +35,7 @@ cowSize= 80
 playerImg = pygame.transform.scale(pygame.image.load('ufo.png'), (playerSize, playerSize))
 cowImg = pygame.transform.scale(pygame.image.load('cow.png'), (cowSize, cowSize))
 farmImg = pygame.transform.scale(pygame.image.load('farm.png'), (cowSize, cowSize))
-numOfCows = 1
+numOfCows = 3
 numCaptured = 0
 numAlienWins = 0
 numCowWins = 0
@@ -47,7 +66,8 @@ cows = [
         "captured": False,
         "time_since_last_change": 0,
         "time_since_last_jump": 0,
-        "time_below": 0
+        "time_below": 0,
+        "sound_played": False
     }
     for _ in range(numOfCows)
 ]
@@ -122,6 +142,10 @@ while running:
         if cow["captured"]:
             cow["pos"].y = player_pos.y
             cow["pos"].x += (player_pos.x + 45 - 40 - cow["pos"].x) * 5 * dt
+            if not cow["sound_played"]:
+                zoomSound.set_volume(2)
+                zoomSound.play()
+                cow["sound_played"] = True 
         else:
             # Wandering 
             if not cow["selected"]:
@@ -159,7 +183,10 @@ while running:
 
     # game over page 
     if (numCaptured == numOfCows or timeRemaining == 0 or collisionTracked):   
-        game_over = True    
+        if not game_over:  
+            game_over = True    
+            pygame.mixer.music.stop()  
+            play_music("gameover", loop=False, volume=2)  
 
         if not timeSaved and numCaptured == numOfCows: 
             completion_time =totalTime 
@@ -208,6 +235,7 @@ while running:
                     win_counted = False
                     timeSaved = False
                     collisionTracked = False
+                    play_music("background", loop=True, volume=2)
 
                     player_pos = pygame.Vector2(screen_width / 2, 10) 
 
@@ -223,7 +251,8 @@ while running:
                             "captured": False,
                             "time_since_last_change": 0,
                             "time_since_last_jump": 0,
-                            "time_below": 0
+                            "time_below": 0, 
+                            "sound_played": False
                         }
                         for _ in range(numOfCows)
                     ]
@@ -232,4 +261,5 @@ while running:
     screen.blit(text8, (screen_width/2 - 115, 10))
 
     pygame.display.update()
+pygame.mixer.music.stop()
 pygame.quit()
