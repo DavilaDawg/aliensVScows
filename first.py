@@ -7,6 +7,7 @@ pygame.init()
 music_files = {
     "background": "synthwave.mp3",
     "gameover": "gameover.mp3",
+    "clock3" : "clock3.mp3",
 }
 
 wooshSound = pygame.mixer.Sound("woosh.mp3")
@@ -36,12 +37,12 @@ cowSize= 80
 playerImg = pygame.transform.scale(pygame.image.load('ufo.png'), (playerSize, playerSize))
 cowImg = pygame.transform.scale(pygame.image.load('cow.png'), (cowSize, cowSize))
 farmImg = pygame.transform.scale(pygame.image.load('farm.png'), (cowSize, cowSize))
-numOfCows = 10
+numOfCows = 5
 numCaptured = 0
 numAlienWins = 0
 numCowWins = 0
 totalTime = 0 
-gameTime = [30, 40, 20]
+gameTime = [12, 40, 20]
 fastest_times= []
 timeSaved= False 
 currentRound=0
@@ -81,7 +82,7 @@ while running:
     timeRemaining = max(0, gameTime[currentRound] - roundedTime)
 
     if timeRemaining < 11 and not clockPlayed:
-        clockSound.set_volume(2)
+        clockSound.set_volume(3)
         clockSound.play()
         clockPlayed= True 
 
@@ -149,7 +150,7 @@ while running:
             cow["pos"].y = player_pos.y
             cow["pos"].x += (player_pos.x + 45 - 40 - cow["pos"].x) * 5 * dt
             if not cow["sound_played"]:
-                zoomSound.set_volume(2)
+                zoomSound.set_volume(3)
                 zoomSound.play()
                 cow["sound_played"] = True 
         else:
@@ -192,6 +193,7 @@ while running:
         if not game_over:  
             game_over = True    
             pygame.mixer.music.stop()  
+            clockSound.stop()
             play_music("gameover", loop=False, volume=2)  
 
         if not timeSaved and numCaptured == numOfCows: 
